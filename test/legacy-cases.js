@@ -49,7 +49,7 @@ module.exports = function runLegacyCases(replaceFromMap, assert) {
   assert.throws(function () { replaceFromMap('z', map); }, function (error) { return error === sentinel; });
   count += 1;
   var bare = Object.create(null);
-  bare.__proto__ = 'safe';
+  Object.defineProperty(bare, '__proto__', { value: 'safe', enumerable: true });
   bare.constructor = 'ctor';
   equal(replaceFromMap('__proto__ constructor', bare), 'safe ctor');
   equal(Object.prototype.safe, undefined);
