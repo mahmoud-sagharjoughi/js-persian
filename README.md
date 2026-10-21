@@ -19,11 +19,11 @@ yarn add persian
 
 The standalone browser build, new conversion options, number and keyboard
 utilities, and TypeScript definitions below
-are part of the upcoming 1.1.0 release. See [CHANGELOG.md](CHANGELOG.md) for changes.
+are available in version 1.1.0 and later. See [CHANGELOG.md](CHANGELOG.md) for changes.
 
 ### Using a script tag
 
-The upcoming 1.1.0 package includes `dist/persian.browser.js`. Copy that file
+The package includes `dist/persian.browser.js`. Copy that file
 from the installed package to your website and load it before your application:
 
 ```html
