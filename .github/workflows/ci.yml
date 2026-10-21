@@ -110,6 +110,7 @@ jobs:
         run: npm install ./persian.tgz --save
       - run: node "${{ runner.temp }}/consumer/installed.js"
       - run: node "${{ runner.temp }}/consumer/test.js"
+      - run: node "${{ runner.temp }}/consumer/legacy-test.js"
       - run: node "${{ runner.temp }}/consumer/standalone.js" "${{ runner.temp }}/consumer"
       - run: node "${{ runner.temp }}/consumer/benchmark.js"
       - name: Native ESM imports

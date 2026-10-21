@@ -54,6 +54,7 @@ function consumerNode(args) {
 }
 consumerNode(['installed.js', mode]);
 consumerNode(['test.js']);
+consumerNode(['legacy-test.js']);
 consumerNode(['standalone.js', consumer]);
 if (Number(process.versions.node.split('.')[0]) >= 12) consumerNode(['test.mjs']);
 console.log('Yarn ' + mode + ': archive installation, lockfile and consumer tests passed.');

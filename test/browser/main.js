@@ -1,5 +1,8 @@
 import { toPersian, toEnglish, formatNumber, numberToWords, switchKeyboard, createPersian, persianDigits, persianLetters, unformatNumber, wordsToDigits } from 'persian';
 
+import replaceFromMap from 'persian/legacy';
+import runLegacyCases from './legacy-cases.mjs';
+
 var checks = 0;
 function equal(actual, expected) {
   if (actual !== expected) {
@@ -16,6 +19,16 @@ function rejects(action, type, message) {
 
 var result = document.getElementById('result');
 try {
+  runLegacyCases(replaceFromMap, {
+    strictEqual: equal,
+    throws: function (action, predicate) {
+      var error;
+      try { action(); } catch (caught) { error = caught; }
+      equal(!!error && predicate(error), true);
+    },
+  });
+  equal(String.prototype.replaceAll, window.originalReplaceAll);
+  equal('12'.replaceAll({ '1': 'x' }), '12');
   [toPersian, toEnglish, formatNumber, numberToWords, switchKeyboard, createPersian, persianDigits, persianLetters, unformatNumber, wordsToDigits].forEach(function (method) {
     equal(typeof method, 'function');
   });

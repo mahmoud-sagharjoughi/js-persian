@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { copyFile, stat } from 'node:fs/promises';
+import { copyFile, readFile, writeFile, stat } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer, build, preview } from 'vite';
@@ -16,6 +16,8 @@ const fixtures = path.dirname(fileURLToPath(import.meta.url));
 for (const file of ['index.html', 'main.js']) {
   await copyFile(path.join(fixtures, file), path.join(consumer, file));
 }
+const legacyCases = await readFile(path.join(fixtures, '../legacy-cases.js'), 'utf8');
+await writeFile(path.join(consumer, 'legacy-cases.mjs'), legacyCases.replace('module.exports =', 'export default'));
 const config = { root: consumer, configFile: false };
 const originalNodeEnv = process.env.NODE_ENV;
 let browser;

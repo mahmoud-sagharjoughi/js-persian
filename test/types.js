@@ -17,9 +17,11 @@ function compile(file) {
 }
 var valid = compile('types-valid.ts');
 assert.strictEqual(valid.status, 0, valid.stdout + valid.stderr);
+var legacy = compile('types-legacy-valid.ts');
+assert.strictEqual(legacy.status, 0, legacy.stdout + legacy.stderr);
 var browser = compile('types-browser.ts');
 assert.strictEqual(browser.status, 0, browser.stdout + browser.stderr);
-['types-invalid.ts', 'types-browser-invalid.ts'].forEach(function (file) {
+['types-invalid.ts', 'types-browser-invalid.ts', 'types-legacy-invalid.ts'].forEach(function (file) {
   var invalid = compile(file);
   assert.notStrictEqual(invalid.status, 0, invalid.stdout + invalid.stderr);
   var errors = invalid.stdout.match(/error TS[0-9]+:/g) || [];
