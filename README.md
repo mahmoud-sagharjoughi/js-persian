@@ -113,7 +113,8 @@ This entry is for migrating existing mappings, including their original quirks:
   are one pass; inserted text is not searched again.
 - Replacement values are converted to strings. `$&`, `$1` and `$$` in values
   are literal text, not replacement templates. Getters run for each match;
-  inherited properties can supply a value for an actual match.
+  inherited properties can supply a value for an actual match. Runtime-specific
+  property lookup behavior, including `__proto__` in older V8 versions, is retained.
 - An empty map creates an empty regex: `replaceFromMap('a', {})` returns
   `'undefinedaundefined'`. An empty-string key inserts its value at each UTF-16
   boundary, including inside surrogate pairs.
