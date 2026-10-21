@@ -5,7 +5,7 @@ import globals from 'globals';
 export default [
   { ignores: ['dist/**', 'test.js'] },
   {
-    files: ['src/**/*.js'],
+    files: ['src/**/*.js', 'legacy.js'],
     languageOptions: {
       ecmaVersion: 2017,
       sourceType: 'module',
@@ -240,5 +240,10 @@ export default [
       'import-x/no-named-default': 'error',
       'strict': 'error',
     },
+  },
+  {
+    files: ['legacy.js'],
+    languageOptions: { ecmaVersion: 5, sourceType: 'commonjs' },
+    rules: { 'no-var': 'off', 'prefer-arrow-callback': 'off', strict: ['error', 'global'] },
   },
 ];

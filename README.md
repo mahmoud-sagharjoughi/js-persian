@@ -57,6 +57,74 @@ and compile as a script (`moduleDetection: "legacy"` on current TypeScript):
 var text: string = persian.toPersian('1234');
 ```
 
+## Migrating the old replaceAll side effect
+
+Version 1.0.1 installed a custom `String.prototype.replaceAll(map)` as a side
+effect of importing the package. Starting with 1.1.0, imports leave JavaScript's
+built-in prototypes unchanged. Calls to `toPersian` and `toEnglish` do not need
+this side effect.
+
+If your application called that custom method directly, version 1.2.0 provides
+an optional compatibility function. Change each affected call:
+
+```js
+// Before: depended on the prototype method installed by 1.0.1
+require('persian');
+var result = '12'.replaceAll({ '1': 'x' });
+
+// After: explicit compatibility mapping; no global changes
+var replaceFromMap = require('persian/legacy');
+var result = replaceFromMap('12', { '1': 'x' }); // 'x2'
+```
+
+Importing `persian/legacy` alone does not restore the old method. Keep ordinary
+standard calls such as `'aba'.replaceAll('a', 'x')` unchanged. A single automatic
+wrapper cannot preserve both meanings: `'12'.replaceAll({ '1': 'x' })` returns
+`'12'` with the standard method and `'x2'` with the old mapping method.
+
+For native Node.js ESM, include the extension:
+
+```js
+import replaceFromMap from 'persian/legacy.js';
+```
+
+TypeScript supports the CommonJS import without additional type packages:
+
+```ts
+import replaceFromMap = require('persian/legacy');
+const result: string = replaceFromMap('12', { '1': 'x' });
+```
+
+The helper is standalone ES5 CommonJS, has no dependencies, and works on Node.js
+0.10 and later without native `String.prototype.replaceAll`. Browser bundlers
+can import it separately. It is not added to `window.persian` or
+`createPersian()` instances, and is not a standard `replaceAll` polyfill.
+
+### Preserved mapping behavior
+
+This entry is for migrating existing mappings, including their original quirks:
+
+- Own enumerable string keys are joined as a regular expression, without
+  escaping, and matched globally and case-insensitively. Invalid patterns throw.
+- Each replacement is looked up using the actual matched text. For example,
+  `replaceFromMap('A a', { a: 'x' })` returns `'undefined x'`. A key such as
+  `'a+'` matches `'aaa'`, but looks up `map.aaa`, not `map['a+']`.
+- Overlapping alternatives keep the runtime's `Object.keys` order. Replacements
+  are one pass; inserted text is not searched again.
+- Replacement values are converted to strings. `$&`, `$1` and `$$` in values
+  are literal text, not replacement templates. Getters run for each match;
+  inherited properties can supply a value for an actual match.
+- An empty map creates an empty regex: `replaceFromMap('a', {})` returns
+  `'undefinedaundefined'`. An empty-string key inserts its value at each UTF-16
+  boundary, including inside surrogate pairs.
+
+Use trusted mappings: keys are regex patterns, not literal search strings.
+The typed API accepts strings or boxed strings and a mapping object. No new
+validation or coercion is added at runtime, so errors from invalid inputs,
+patterns or replacement values propagate. Symbols are not pattern keys, and
+`Symbol.replace` on the map is not invoked. The map and built-in prototypes
+are not modified by the helper.
+
 ## Compatibility
 
 The published package uses ES5 CommonJS and has no runtime dependencies.
@@ -69,7 +137,7 @@ Building from source requires Node.js 22.18 or later in the 22.x line, or Node.j
 package retains the runtime compatibility listed above.
 
 Run `npm run lint` to check the source style and `npm test` to build the package
-and run the regression tests. The tests cover conversion options, half-spaces, numeric boundaries, keyboard layouts, invalid
+and run the regression tests, including the optional legacy entry. The tests cover conversion options, half-spaces, numeric boundaries, keyboard layouts, invalid
 inputs, unchanged `String.prototype`, and all 65,536 UTF-16 code units across
 every combination of conversion options. A fixed seed generates 5,000 additional
 numeric cases covering mixed digit scripts, signs, leading and trailing zeros,
@@ -97,7 +165,8 @@ Yarn 1.22.22 on Node.js 24.16.0, and Yarn 4.18.1 on Node.js 24.16.0 using both
 access and enabled lifecycle scripts. A second install checks the frozen or
 immutable lockfile. Each consumer verifies package contents and zero runtime
 dependencies, then runs the regression tests; Node.js 12 and later also check
-native ESM imports. Plug'n'Play consumers run through `yarn node` to load Yarn's
+native ESM imports. These consumers also test the legacy subpath against the
+original 1.0.1 mapping method. Plug'n'Play consumers run through `yarn node` to load Yarn's
 module resolver. These jobs test package consumption; building this repository
 still requires the development Node.js versions listed above.
 

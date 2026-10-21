@@ -1,6 +1,6 @@
 {
   "name": "persian",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Persian(farsi) localization",
   "main": "dist/persian.js",
   "types": "index.d.ts",
@@ -8,14 +8,16 @@
     "dist/persian.js",
     "dist/persian.browser.js",
     "index.d.ts",
+    "legacy.js",
+    "legacy.d.ts",
     "CHANGELOG.md"
   ],
   "scripts": {
     "build": "node_modules/.bin/babel src --out-dir dist && node scripts/build-browser.js",
     "prepare": "npm run build",
     "prepublishOnly": "npm test",
-    "test": "npm run build && node test/persian.test.js && node test/standalone.js",
-    "lint": "node_modules/.bin/eslint src/persian.js",
+    "test": "npm run build && node test/persian.test.js && node test/standalone.js && node test/legacy.js",
+    "lint": "node_modules/.bin/eslint src/persian.js legacy.js",
     "benchmark": "node benchmark/to-persian.js",
     "test:browser": "node test/browser/run.mjs"
   },

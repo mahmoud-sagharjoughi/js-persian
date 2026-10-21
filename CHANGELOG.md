@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.2.0 (2026-10-21)
+
+### Added
+
+- Optional `persian/legacy` mapping function with TypeScript declarations for migrating calls to the custom `String.prototype.replaceAll` installed by 1.0.1.
+- Legacy behavior and isolation regressions, checked against the original 1.0.1 method and through packaged Node.js, Yarn, ESM and browser consumers.
+
+The helper preserves the old mapping semantics without installing or replacing a global method. Existing `string.replaceAll(map)` calls require an explicit migration; importing the helper alone does not change them. The main API and standalone browser build are unchanged.
+
 ## 1.1.0 (2026-10-21)
 
 ### Added

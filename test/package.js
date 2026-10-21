@@ -10,7 +10,7 @@ var archives = fs.readdirSync(archiveDirectory).filter(function (file) {
 });
 assert.strictEqual(archives.length, 1, 'Expected one npm package');
 var archive = fs.readFileSync(path.join(archiveDirectory, archives[0]));
-var expectedFiles = ['CHANGELOG.md', 'LICENSE', 'README.md', 'dist/persian.js', 'dist/persian.browser.js', 'index.d.ts', 'package.json'];
+var expectedFiles = ['CHANGELOG.md', 'LICENSE', 'README.md', 'dist/persian.js', 'dist/persian.browser.js', 'index.d.ts', 'legacy.d.ts', 'legacy.js', 'package.json'];
 var entries = execFileSync('tar', ['-tzf', '-'], { input: archive, encoding: 'utf8' }).trim().split(/\r?\n/);
 assert.deepEqual(entries.sort(), expectedFiles.map(function (file) { return 'package/' + file; }).sort());
 
@@ -36,7 +36,7 @@ assert.strictEqual(metadata.name, 'persian');
 assert.strictEqual(metadata.version, require('../package.json').version);
 assert.strictEqual(metadata.main, 'dist/persian.js');
 assert.strictEqual(metadata.types, 'index.d.ts');
-assert.deepEqual(metadata.files, ['dist/persian.js', 'dist/persian.browser.js', 'index.d.ts', 'CHANGELOG.md']);
+assert.deepEqual(metadata.files, ['dist/persian.js', 'dist/persian.browser.js', 'index.d.ts', 'legacy.js', 'legacy.d.ts', 'CHANGELOG.md']);
 assert.deepEqual(Object.keys(metadata.dependencies || {}), []);
 
 var benchmark = fs.readFileSync(path.join(__dirname, '../benchmark/to-persian.js'), 'utf8');
@@ -46,6 +46,9 @@ if (process.argv[4] === '--check-syntax') {
   parse(fs.readFileSync(path.join(target, 'dist/persian.browser.js'), 'utf8'), { ecmaVersion: 5 });
   parse(fs.readFileSync(path.join(__dirname, 'standalone.js'), 'utf8'), { ecmaVersion: 5 });
   parse(fs.readFileSync(path.join(__dirname, 'browser/assert.js'), 'utf8'), { ecmaVersion: 5 });
+  parse(fs.readFileSync(path.join(target, 'legacy.js'), 'utf8'), { ecmaVersion: 5 });
+  parse(fs.readFileSync(path.join(__dirname, 'legacy.js'), 'utf8'), { ecmaVersion: 5 });
+  parse(fs.readFileSync(path.join(__dirname, 'legacy-cases.js'), 'utf8'), { ecmaVersion: 5 });
   parse(benchmark, { ecmaVersion: 5 });
   parse(fs.readFileSync(path.join(__dirname, 'installed.js'), 'utf8'), { ecmaVersion: 5 });
   parse(fs.readFileSync(path.join(__dirname, 'persian.test.js'), 'utf8'), { ecmaVersion: 5 });
@@ -65,6 +68,9 @@ var browserInvalid = fs.readFileSync(path.join(__dirname, 'types-invalid.ts'), '
 fs.writeFileSync(path.join(consumer, 'types-browser-invalid.ts'), browserInvalid);
 fs.writeFileSync(path.join(consumer, 'test.mjs'), [
   "import assert from 'assert';",
+  "import replaceFromMap from 'persian/legacy.js';",
+  "assert.strictEqual(replaceFromMap('12', { '1': 'x' }), 'x2');",
+  "assert.strictEqual(typeof replaceFromMap, 'function');",
   "import { toPersian, toEnglish, formatNumber, numberToWords, switchKeyboard, createPersian, persianDigits, persianLetters, unformatNumber, wordsToDigits } from 'persian';",
   "assert.strictEqual(toPersian('123'), '۱۲۳');",
   "assert.strictEqual(toPersian('مي\\u200cروم', { preserveHalfSpace: true }), 'می\\u200cروم');",
@@ -90,3 +96,12 @@ fs.writeFileSync(path.join(consumer, 'test.mjs'), [
 console.log('Package contents verified: ' + metadata.name + '@' + metadata.version);
 
 fs.copyFileSync(path.join(__dirname, 'standalone.js'), path.join(consumer, 'standalone.js'));
+
+var legacy = fs.readFileSync(path.join(__dirname, 'legacy.js'), 'utf8');
+fs.writeFileSync(path.join(consumer, 'legacy-test.js'), legacy.replace(/'\.\.\/legacy'/g, "'persian/legacy'"));
+fs.copyFileSync(path.join(__dirname, 'legacy-cases.js'), path.join(consumer, 'legacy-cases.js'));
+fs.mkdirSync(path.join(consumer, 'fixtures'));
+fs.copyFileSync(path.join(__dirname, 'fixtures/legacy-1.0.1.js'), path.join(consumer, 'fixtures/legacy-1.0.1.js'));
+['types-legacy-valid.ts', 'types-legacy-invalid.ts'].forEach(function (file) {
+  fs.copyFileSync(path.join(__dirname, file), path.join(consumer, file));
+});

@@ -34,8 +34,11 @@ if (mode === 'pnp') {
 }
 assert.strictEqual(fs.lstatSync(target).isSymbolicLink(), false);
 assert.deepEqual(fs.readdirSync(target).sort(), [
-  'CHANGELOG.md', 'LICENSE', 'README.md', 'dist', 'index.d.ts', 'package.json',
+  'CHANGELOG.md', 'LICENSE', 'README.md', 'dist', 'index.d.ts', 'legacy.d.ts', 'legacy.js', 'package.json',
 ]);
+assert.strictEqual(require.resolve('persian/legacy'), path.join(target, 'legacy.js'));
+assert.strictEqual(require('persian/legacy')('12', { '1': 'x' }), 'x2');
+assert.ok(fs.statSync(path.join(target, 'legacy.d.ts')).isFile());
 assert.strictEqual(require.resolve('persian'), path.join(target, 'dist', 'persian.js'));
 assert.ok(fs.statSync(path.join(target, metadata.types)).isFile());
 assert.deepEqual(fs.readdirSync(path.join(target, 'dist')).sort(), ['persian.browser.js', 'persian.js']);
