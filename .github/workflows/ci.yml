@@ -27,6 +27,7 @@ jobs:
           node-version: '24.16.0'
           package-manager-cache: false
       - run: npm ci --ignore-scripts
+      - run: npm run test:release
       - run: npm run lint
       - run: npm test
       - run: npm pack --pack-destination "${{ runner.temp }}"

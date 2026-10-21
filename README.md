@@ -272,6 +272,55 @@ original 1.0.1 mapping method. Plug'n'Play consumers run through `yarn node` to 
 module resolver. These jobs test package consumption; building this repository
 still requires the development Node.js versions listed above.
 
+## Release checks for maintainers
+
+Use Node.js 24.16.0 and npm 11 for releases from this repository. These are
+maintainer tools only; the published runtime and its supported Node.js versions
+are unchanged. No release script runs when consumers install the npm archive.
+
+`prepublishOnly` runs the release check, lint and regression tests before a
+normal directory publication. The check requires:
+
+- An explicit `next` tag and the public npm registry. `latest` remains protected
+  on 1.0.1; CLI overrides to another tag or registry are rejected.
+- A new stable 2.x version, newer than every published stable 2.x version,
+  matching the root entries in `package-lock.json` and a version heading in
+  `CHANGELOG.md` (an optional date in parentheses is supported).
+- A clean checkout at the current pushed `master` commit, with the newest push
+  CI run for that exact commit completed successfully. All compatibility jobs
+  must pass, including old Node.js, TypeScript, Yarn and all three browsers;
+  skipped jobs do not qualify.
+- The existing protected versions and compatibility warnings still present in
+  npm. The check only reads registry and GitHub metadata; it never moves tags,
+  publishes packages or edits deprecations. Network failures, rate limits and
+  incomplete responses block publication.
+
+For a future release, update the version, lockfile and changelog together,
+review compatibility, commit and push, then wait for the full CI matrix. From
+a clean checkout with dependencies installed using `npm ci --ignore-scripts`:
+
+```bash
+npm run release:check --tag=next --registry=https://registry.npmjs.org/
+npm publish --dry-run --tag=next --registry=https://registry.npmjs.org/
+# Only after reviewing the dry-run output:
+npm publish --tag=next --registry=https://registry.npmjs.org/
+```
+
+The currently published 2.0.0 intentionally fails the duplicate-version check.
+Do not bump a version merely to test the gate. `npm run test:release` exercises
+successful and blocked releases with isolated fixtures, including npm lifecycle
+checks, without publishing anything. CI runs these tests before building its
+consumer archive. The scripts and their tests are excluded from that archive.
+
+This is protection against release mistakes, not an npm permission boundary.
+`--ignore-scripts`, publishing a prebuilt tarball, or manually changing dist-tags
+can bypass lifecycle checks; do not use those paths for releases. The check
+cannot prove that an arbitrary code change is backward compatible or prevent
+concurrent changes after verification. Review changes and the CI results before
+publishing. New majors, prereleases, changes to the protected `latest` channel,
+or changes to required CI coverage need a separate policy review. The `next`
+tag does not exclude stable 2.x versions from consumers' broad SemVer ranges.
+
 ## Yarn consumer tests
 
 To test a local archive with an already installed Yarn CLI, prepare a fresh

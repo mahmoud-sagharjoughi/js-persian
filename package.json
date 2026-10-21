@@ -15,11 +15,13 @@
   "scripts": {
     "build": "node_modules/.bin/babel src --out-dir dist && node scripts/build-browser.js",
     "prepare": "npm run build",
-    "prepublishOnly": "npm test",
+    "prepublishOnly": "npm run release:check && npm run lint && npm test",
     "test": "npm run build && node test/persian.test.js && node test/standalone.js && node test/legacy.js",
     "lint": "node_modules/.bin/eslint src/persian.js legacy.js",
     "benchmark": "node benchmark/to-persian.js",
-    "test:browser": "node test/browser/run.mjs"
+    "test:browser": "node test/browser/run.mjs",
+    "release:check": "node scripts/check-release.js",
+    "test:release": "node --test test/release.js"
   },
   "author": "Mahmoud Sagharjoughi <mahmood.sa225@gmail.com>",
   "license": "Beerware",
@@ -52,6 +54,7 @@
   },
   "homepage": "https://github.com/Mahmoud-Sagharjoughi/js-persian",
   "publishConfig": {
-    "tag": "next"
+    "tag": "next",
+    "registry": "https://registry.npmjs.org/"
   }
 }

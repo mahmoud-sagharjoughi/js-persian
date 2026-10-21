@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- Add maintainer-only publication checks for the next channel, version and
+  lockfile consistency, protected npm metadata, a clean pushed commit and its
+  complete successful compatibility CI matrix. Add isolated release-gate and
+  npm lifecycle tests. Runtime behavior and existing npm dist-tags are unchanged.
+
 ## 2.0.0 (2026-10-21)
 
 ### Compatibility notice
