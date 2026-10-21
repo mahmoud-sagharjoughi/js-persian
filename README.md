@@ -3,28 +3,97 @@
 [![npm version](https://badge.fury.io/js/persian.svg)](https://badge.fury.io/js/persian)
 [![CI](https://github.com/Mahmoud-Sagharjoughi/js-persian/actions/workflows/ci.yml/badge.svg)](https://github.com/Mahmoud-Sagharjoughi/js-persian/actions/workflows/ci.yml)
 
-## Release channels
+## Compatibility notice and release channels
 
-This README documents **2.0.0**, published under the **next** tag. For this
-release, **latest remains on 1.0.1** to reduce automatic upgrades from the
-historical behavior. Install 2.0.0 explicitly after reviewing the migration
-below. An unqualified `npm install persian` or `yarn add persian` follows
-`latest` and does not provide the newer APIs documented here.
+As of 2026-10-21, **latest points to 1.0.1** and **next points to 2.0.0**.
+This README documents the newer APIs in 2.0.0. An unqualified
+`npm install persian` or `yarn add persian` selects `latest`, which does not
+provide those newer APIs.
 
-Versions 1.1.0 and 1.2.0 remain available, with a compatibility warning: they
-removed the old `String.prototype.replaceAll(map)` side effect in a minor
-release. Version 2.0.0 makes that migration a major-version boundary. Its
-runtime files and TypeScript declarations are unchanged from 1.2.0.
+Versions 1.1.0 and 1.2.0 remain downloadable with a compatibility warning. They
+removed the historical `String.prototype.replaceAll(map)` side effect in a
+minor release. Version 2.0.0 establishes the major-version boundary; its runtime
+files and TypeScript declarations are unchanged from 1.2.0. The warning is
+about that side effect, not a request for every application to downgrade.
 
-Tags and deprecation warnings do not prevent every automatic update or change
-an existing lockfile. A dependency range can still allow 1.1.0 or 1.2.0, and
-package managers may choose versions differently. Version 2.0.0 is a stable
-SemVer version even under `next`: broad ranges such as `*` or `>=1` can include
-it, while `^1.0.1` excludes it. Use an exact version or an appropriate bounded
-range with a lockfile. Applications already using the newer APIs should pin
-their intended version; returning to 1.0.1 removes
-those APIs and restores its prototype mutation. Applications depending on the
-old method can pin 1.0.1 until they migrate.
+### Choose the version for your application
+
+| Your application | What to do |
+| --- | --- |
+| Works on 1.0.1 and depends on the installed `text.replaceAll(map)` method | Pin **1.0.1** until you can migrate the affected calls. This retains the historical prototype mutation; it does not preserve native `replaceAll` behavior. |
+| Uses only `toPersian` / `toEnglish`, with no code depending on the global method | Pin the current working version for reproducibility. These converters do not require the legacy helper; review and test an upgrade to 2.0.0 explicitly. |
+| Works on 1.1.0 or 1.2.0 and uses newer APIs, browser builds, or native `replaceAll` | Pin that exact working version first. Do not switch to 1.0.1 just to remove a warning: it lacks the newer APIs and changes the global method. Review and test an explicit move to 2.0.0 separately. |
+| Is ready to migrate, or already works on 2.0.0 | Pin **2.0.0**. Replace each legacy mapping call as described below; importing the helper alone is not a migration. |
+| Declares `*`, `latest`, `next`, or another broad range | Identify the version from the last working deployment or lockfile, then pin it. Do not infer the intended behavior from the current tag or from a fresh install. |
+
+If you use an older historical release, preserve its known-working version
+until you have checked its API separately; this guide's legacy example is
+specifically for 1.0.1.
+
+### Pin a direct dependency
+
+Before changing dependencies, preserve the last working lockfile and check
+`npm ls persian` or `yarn why persian` in that working project. These commands
+show the installed/dependency tree; they do not prove that a fresh resolution
+will behave the same way. Do not delete the lockfile to resolve the warning.
+
+Run **one** command from the appropriate column in the project or workspace
+that declares the dependency. Use the package manager already used there.
+
+| Target version | npm | Yarn Classic or modern Yarn |
+| --- | --- | --- |
+| Preserve 1.0.1 | `npm install persian@1.0.1 --save-exact` | `yarn add persian@1.0.1 --exact` |
+| Preserve 1.1.0 | `npm install persian@1.1.0 --save-exact` | `yarn add persian@1.1.0 --exact` |
+| Preserve 1.2.0 | `npm install persian@1.2.0 --save-exact` | `yarn add persian@1.2.0 --exact` |
+| Adopt or preserve 2.0.0 | `npm install persian@2.0.0 --save-exact` | `yarn add persian@2.0.0 --exact` |
+
+Check that `package.json` contains the exact chosen version, for example
+`"persian": "1.2.0"`, with no `^`, `~`, wildcard or tag. Review the lockfile diff,
+run your application's tests, and commit `package.json` and the matching
+`package-lock.json` or `yarn.lock` together. Pinning prevents unrequested version
+selection; it does not repair code already incompatible with the selected
+version. Keep your package-manager version and project configuration consistent
+between development and CI.
+
+Use the matching frozen-install command in CI after committing the lockfile:
+
+| Package manager | CI command |
+| --- | --- |
+| npm with `npm ci` support | `npm ci` |
+| Yarn 1 / Classic | `yarn install --frozen-lockfile` |
+| Modern Yarn | `yarn install --immutable` |
+
+These commands are for reproducing the reviewed dependency set, not for
+upgrading it. Older npm releases without `npm ci` should follow the project's
+existing shrinkwrap workflow; an exact direct dependency alone does not freeze
+the rest of an application's dependency tree. See the official
+[npm ci](https://docs.npmjs.com/cli/v11/commands/npm-ci/),
+[Yarn Classic install](https://classic.yarnpkg.com/lang/en/docs/cli/install/)
+and [modern Yarn install](https://yarnpkg.com/cli/install) documentation.
+
+If `persian` is a transitive dependency, adding a direct pin may not change the
+copy used by another package. Use the dependency tree to identify that parent
+and coordinate its upgrade or pin; do not force a global override without
+testing the parent's expected behavior.
+
+For script tags, workers or CDN imports, retain a known-working copied artifact
+or use a URL with the exact intended package version. Floating `latest`, `next`
+or unversioned URLs are not pins. The standalone browser build starts at 1.1.0;
+do not replace a working newer browser build with 1.0.1.
+
+### What tags and warnings cannot guarantee
+
+A dependency tag and a version range are different selectors. `latest` currently
+selects 1.0.1, so resolving it again can downgrade applications that adopted
+newer APIs. A range such as `*` or `>=1` permits 2.0.0 even though it is tagged
+`next`: 2.0.0 is a stable SemVer version, not a prerelease. `^1.0.1` excludes
+2.0.0 but still permits 1.1.0 and 1.2.0.
+
+Package managers can prefer different allowed versions, and deprecation can
+influence their selection. A warning does not prohibit installation, and moving
+a tag does not rewrite existing lockfiles or already-deployed code. Keep the
+exact version that your application has tested instead of relying on a tag,
+a warning, or a package manager's current selection preference.
 
 ## Installing
 
@@ -88,8 +157,11 @@ built-in prototypes unchanged. This is a breaking change for applications that
 called the installed method directly. Version 2.0.0 retains that standard
 behavior. Calls to `toPersian` and `toEnglish` do not need this side effect.
 
-If your application called that custom method directly, version 1.2.0 provides
-an optional compatibility function. Change each affected call:
+For a deliberate migration, pin 2.0.0 using the commands above and change every
+call that depended on the installed mapping method, including calls in shared
+helpers. The compatibility function is also available in 1.2.0; it is absent
+from 1.0.1 and 1.1.0. Review each call instead of replacing all uses of
+`replaceAll` indiscriminately:
 
 ```js
 // Before: depended on the prototype method installed by 1.0.1
@@ -105,6 +177,11 @@ Importing `persian/legacy` alone does not restore the old method. Keep ordinary
 standard calls such as `'aba'.replaceAll('a', 'x')` unchanged. A single automatic
 wrapper cannot preserve both meanings: `'12'.replaceAll({ '1': 'x' })` returns
 `'12'` with the standard method and `'x2'` with the old mapping method.
+
+Run your application's tests after migrating, including its actual maps and
+interactions with other libraries. Keep the previous working code and lockfile
+as a rollback point; roll them back together if validation fails. Neither the
+helper nor the package reinstalls the global method.
 
 For native Node.js ESM, include the extension:
 

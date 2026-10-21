@@ -2,15 +2,88 @@
 
 ## 2.0.0 (2026-10-21)
 
-### Breaking change from 1.0.1
+### Compatibility notice
 
-- Importing the package no longer installs the custom `String.prototype.replaceAll(map)`. Applications using that side effect must migrate explicitly to `persian/legacy`; standard JavaScript methods remain untouched.
-- This behavior was already present in 1.1.0 and 1.2.0. Those minor releases remain downloadable with a compatibility warning. Version 2.0.0 establishes the major-version boundary; its runtime files and TypeScript declarations are unchanged from 1.2.0.
+Removing the `String.prototype.replaceAll(map)` method installed by 1.0.1 is a
+breaking change for applications that called it directly. Versions 1.1.0 and
+1.2.0 already removed that side effect in minor releases; both remain available
+with a targeted compatibility warning. A warning does not mean every consumer
+should downgrade.
+
+Version 2.0.0 establishes the major-version boundary. Its runtime files and
+TypeScript declarations are byte-identical to 1.2.0. Standard JavaScript methods
+remain untouched, and the existing `toPersian` / `toEnglish` defaults are
+unchanged. This documentation clarification changes no runtime behavior.
 
 ### Release channels
 
-- Publish 2.0.0 under `next`, with `publishConfig.tag` defaulting to `next`. Keep `latest` on 1.0.1.
-- Document explicit installation, migration, and the limits of tags, dependency ranges and deprecation warnings.
+- `latest` remains on **1.0.1**; `next` points to **2.0.0**.
+- This release does not remove or replace any published version. The default
+  publication tag in this repository is `next`.
+- `next` is not a SemVer prerelease marker. Open ranges such as `*` and `>=1`
+  permit 2.0.0; `^1.0.1` excludes 2.0.0 but permits the warned 1.x releases.
+  Package managers and existing lockfiles can select different versions.
+- Resolving `latest` again can downgrade applications that adopted newer APIs.
+  Neither a tag change nor a warning repairs or rewrites an existing deployment.
+
+### Pin the version that matches your application
+
+Preserve the last working lockfile and inspect `npm ls persian` or
+`yarn why persian` before changing dependencies. Choose one row and the package
+manager already used by your project:
+
+| Situation | npm | Yarn |
+| --- | --- | --- |
+| Depends on the historical 1.0.1 mapping method | `npm install persian@1.0.1 --save-exact` | `yarn add persian@1.0.1 --exact` |
+| Already works on 1.1.0 | `npm install persian@1.1.0 --save-exact` | `yarn add persian@1.1.0 --exact` |
+| Already works on 1.2.0 | `npm install persian@1.2.0 --save-exact` | `yarn add persian@1.2.0 --exact` |
+| Ready to migrate to, or already works on, 2.0.0 | `npm install persian@2.0.0 --save-exact` | `yarn add persian@2.0.0 --exact` |
+
+For `*`, `latest`, `next` or broad ranges, choose the exact version from the last
+working deployment, not whatever a fresh install currently returns. Do not
+remove a working lockfile or downgrade newer-API users solely to silence the
+warning. Pinning 1.0.1 retains its global prototype mutation and lacks the newer
+APIs and standalone browser build.
+
+Verify that `package.json` has the intended exact version, review the lockfile
+diff, test the application, and commit both files. Use `npm ci` where supported,
+`yarn install --frozen-lockfile` for Yarn Classic, or `yarn install --immutable`
+for modern Yarn in CI. Older npm users should retain their established
+shrinkwrap workflow. Use the same package-manager version and configuration as
+the working project. A direct pin does not necessarily control transitive
+copies; identify and test the parent dependency before changing those.
+
+Applications using only `toPersian` / `toEnglish`, with no dependency on the
+global method, do not need the legacy helper. Preserve the working version
+first, and test any deliberate upgrade separately.
+
+### Migrate legacy mapping calls explicitly
+
+After selecting 2.0.0, change each affected call:
+
+```js
+// Before: depended on the method installed by 1.0.1
+text.replaceAll(map);
+
+// After: explicit mapping, without changing String.prototype
+var replaceFromMap = require('persian/legacy');
+replaceFromMap(text, map);
+```
+
+Importing `persian/legacy` alone does not fix old call sites. Leave standard
+`replaceAll(search, replacement)` calls unchanged. The helper exists in 1.2.0
+and 2.0.0, not in 1.0.1 or 1.1.0. Native Node.js ESM imports use
+`import replaceFromMap from 'persian/legacy.js'`.
+
+Test the application's actual mappings and interactions with other libraries;
+the old regex, case-insensitive lookup, coercion and empty-map quirks are
+preserved. Keep the working code and lockfile together as a rollback point.
+Browser consumers should pin their artifact or CDN URL too; the helper is a
+separate bundler import and is not added to the standalone `window.persian` API.
+
+See the [pinning guide](README.md#pin-a-direct-dependency) and
+[full migration guide](README.md#migrating-the-old-replaceall-side-effect) for
+version-specific instructions and edge cases.
 
 ## 1.2.0 (2026-10-21)
 
