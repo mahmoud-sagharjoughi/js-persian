@@ -18,8 +18,11 @@ runtime files and TypeScript declarations are unchanged from 1.2.0.
 
 Tags and deprecation warnings do not prevent every automatic update or change
 an existing lockfile. A dependency range can still allow 1.1.0 or 1.2.0, and
-package managers may choose versions differently. Applications already using
-the newer APIs should pin their intended version; returning to 1.0.1 removes
+package managers may choose versions differently. Version 2.0.0 is a stable
+SemVer version even under `next`: broad ranges such as `*` or `>=1` can include
+it, while `^1.0.1` excludes it. Use an exact version or an appropriate bounded
+range with a lockfile. Applications already using the newer APIs should pin
+their intended version; returning to 1.0.1 removes
 those APIs and restores its prototype mutation. Applications depending on the
 old method can pin 1.0.1 until they migrate.
 
