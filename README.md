@@ -3,23 +3,43 @@
 [![npm version](https://badge.fury.io/js/persian.svg)](https://badge.fury.io/js/persian)
 [![CI](https://github.com/Mahmoud-Sagharjoughi/js-persian/actions/workflows/ci.yml/badge.svg)](https://github.com/Mahmoud-Sagharjoughi/js-persian/actions/workflows/ci.yml)
 
+## Release channels
+
+This README documents **2.0.0**, published under the **next** tag. For this
+release, **latest remains on 1.0.1** to reduce automatic upgrades from the
+historical behavior. Install 2.0.0 explicitly after reviewing the migration
+below. An unqualified `npm install persian` or `yarn add persian` follows
+`latest` and does not provide the newer APIs documented here.
+
+Versions 1.1.0 and 1.2.0 remain available, with a compatibility warning: they
+removed the old `String.prototype.replaceAll(map)` side effect in a minor
+release. Version 2.0.0 makes that migration a major-version boundary. Its
+runtime files and TypeScript declarations are unchanged from 1.2.0.
+
+Tags and deprecation warnings do not prevent every automatic update or change
+an existing lockfile. A dependency range can still allow 1.1.0 or 1.2.0, and
+package managers may choose versions differently. Applications already using
+the newer APIs should pin their intended version; returning to 1.0.1 removes
+those APIs and restores its prototype mutation. Applications depending on the
+old method can pin 1.0.1 until they migrate.
+
 ## Installing
 
 ### Using NPM
 
 ```bash
-npm install persian
+npm install persian@2.0.0 --save-exact
 ```
 
 ### Using Yarn
 
 ```bash
-yarn add persian
+yarn add persian@2.0.0 --exact
 ```
 
-The standalone browser build, new conversion options, number and keyboard
-utilities, and TypeScript definitions below
-are available in version 1.1.0 and later. See [CHANGELOG.md](CHANGELOG.md) for changes.
+To resolve the opt-in release tag instead, use
+`npm install persian@next --save-exact` or `yarn add persian@next --exact`. The commands above pin this
+release directly. See [CHANGELOG.md](CHANGELOG.md) for changes.
 
 ### Using a script tag
 
@@ -61,8 +81,9 @@ var text: string = persian.toPersian('1234');
 
 Version 1.0.1 installed a custom `String.prototype.replaceAll(map)` as a side
 effect of importing the package. Starting with 1.1.0, imports leave JavaScript's
-built-in prototypes unchanged. Calls to `toPersian` and `toEnglish` do not need
-this side effect.
+built-in prototypes unchanged. This is a breaking change for applications that
+called the installed method directly. Version 2.0.0 retains that standard
+behavior. Calls to `toPersian` and `toEnglish` do not need this side effect.
 
 If your application called that custom method directly, version 1.2.0 provides
 an optional compatibility function. Change each affected call:

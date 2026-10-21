@@ -34,6 +34,7 @@ if (prepareInstall) {
 }
 assert.strictEqual(metadata.name, 'persian');
 assert.strictEqual(metadata.version, require('../package.json').version);
+assert.strictEqual(metadata.publishConfig.tag, 'next', 'The opt-in release must default to next');
 assert.strictEqual(metadata.main, 'dist/persian.js');
 assert.strictEqual(metadata.types, 'index.d.ts');
 assert.deepEqual(metadata.files, ['dist/persian.js', 'dist/persian.browser.js', 'index.d.ts', 'legacy.js', 'legacy.d.ts', 'CHANGELOG.md']);
