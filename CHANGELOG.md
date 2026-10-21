@@ -1,5 +1,17 @@
 # Changelog
 
+## 2.0.0 (2026-10-21)
+
+### Breaking change from 1.0.1
+
+- Importing the package no longer installs the custom `String.prototype.replaceAll(map)`. Applications using that side effect must migrate explicitly to `persian/legacy`; standard JavaScript methods remain untouched.
+- This behavior was already present in 1.1.0 and 1.2.0. Those minor releases remain downloadable with a compatibility warning. Version 2.0.0 establishes the major-version boundary; its runtime files and TypeScript declarations are unchanged from 1.2.0.
+
+### Release channels
+
+- Publish 2.0.0 under `next`, with `publishConfig.tag` defaulting to `next`. Keep `latest` on 1.0.1.
+- Document explicit installation, migration, and the limits of tags, dependency ranges and deprecation warnings.
+
 ## 1.2.0 (2026-10-21)
 
 ### Added
